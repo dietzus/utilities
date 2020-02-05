@@ -67,3 +67,53 @@ uint8_t setFrequency(TIM_HandleTypeDef *timer, uint32_t freq) {
 
 	return 1;
 }
+
+void TIM1_UP_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM1_UP_IRQn 0 */
+
+  /* USER CODE END TIM1_UP_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim1);
+  /* USER CODE BEGIN TIM1_UP_IRQn 1 */
+
+  static uint16_t lastInt;
+  int16_t tempInt;
+  if(isLookup) {
+	  tempInt = lookup[lookupiter];
+  } else {
+
+  }
+
+  if(lastInt == tempInt) {
+	  return;
+  } else {
+	  lastInt = tempInt;
+  }
+
+  if(tempInt == 0) {
+	  HAL_TIM_PWM_Stop(&htim1, 0);
+	  HAL_TIM_PWM_Stop(&htim1, 2);
+	  HAL_TIM_PWM_Stop(&htim1, 4);
+	  HAL_TIM_PWM_Stop(&htim1, 6);
+  } else if (tempInt < 0) {
+	  TIM1->CCR1 = tempInt;
+	  if(curCha != 1) {
+		  HAL_TIM_PWM_Start(&htim1, 0);
+		  HAL_TIM_PWM_Start(&htim1, 2);
+		  HAL_TIM_PWM_Stop(&htim1, 4);
+		  HAL_TIM_PWM_Stop(&htim1, 6);
+		  curCha = 1;
+	  }
+  } else {
+	  TIM1->CCR2 = tempInt;
+	  curCha = 2;
+	  if(curCha != 2) {
+		  HAL_TIM_PWM_Stop(&htim1, 0);
+		  HAL_TIM_PWM_Stop(&htim1, 2);
+		  HAL_TIM_PWM_Start(&htim1, 4);
+		  HAL_TIM_PWM_Start(&htim1, 6);
+		  curCha = 2;
+	  }
+  }
+  /* USER CODE END TIM1_UP_IRQn 1 */
+}
